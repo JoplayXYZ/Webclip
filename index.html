@@ -1,0 +1,444 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iOS WebClip Profile Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f7;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1d1d1f;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: white;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.5rem 0;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: normal;
+    }
+
+    .identifier-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .identifier-container input {
+      flex: 1;
+    }
+
+    #previewContainer {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    #iconPreview {
+      max-width: 128px;
+      max-height: 128px;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: #0071e3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .small-button {
+      width: auto;
+      padding: 0.75rem 1rem;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #0077ed;
+    }
+
+    button:active {
+      background: #006edb;
+    }
+
+    .secondary-button {
+      background: #f5f5f7;
+      color: #1d1d1f;
+      border: 1px solid #d2d2d7;
+      margin-bottom: 1rem;
+    }
+
+    .secondary-button:hover {
+      background: #eee;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .advanced-settings {
+      margin-top: 2rem;
+    }
+
+    .download-buttons {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .download-button {
+      flex: 1;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .download-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>iOS WebClip Profile Generator</h1>
+    
+    <form id="profileForm">
+      <div class="form-group">
+        <label for="title">App Title:</label>
+        <input type="text" id="title" required>
+      </div>
+
+      <div class="form-group">
+        <label for="url">Website URL:</label>
+        <input type="url" id="url" required>
+      </div>
+
+      <div class="form-group">
+        <label for="iconUpload">App Icon (1024x1024 recommended):</label>
+        <input type="file" id="iconUpload" accept="image/*" required>
+        <div id="previewContainer">
+          <img id="iconPreview" alt="Icon preview">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="identifier">Bundle Identifier:</label>
+        <div class="identifier-container">
+          <input type="text" id="identifier" placeholder="com.example.webclip" required>
+          <button type="button" id="generateIdentifier" class="secondary-button small-button">Generate</button>
+        </div>
+      </div>
+
+      <div class="form-group settings-grid">
+        <label class="checkbox-label">
+          <input type="checkbox" id="fullscreen">
+          Open in Full Screen
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="precomposed">
+          Precomposed Icon
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="removable" checked>
+          Removable
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="preventBackup">
+          Prevent Backup
+        </label>
+      </div>
+
+      <div class="advanced-settings">
+        <button type="button" id="toggleAdvanced" class="secondary-button">Advanced Settings</button>
+        <div id="advancedPanel">
+          <div class="form-group">
+            <label for="description">Profile Description:</label>
+            <textarea id="description" rows="3">Configures Web Clip</textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="organization">Organization Name:</label>
+            <input type="text" id="organization" placeholder="Optional">
+          </div>
+
+          <div class="form-group">
+            <label for="expiryDays">Profile Expiry (days):</label>
+            <input type="number" id="expiryDays" min="0" placeholder="Never expires">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit">Generate Profile</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
+    const form = document.getElementById('profileForm');
+    const iconUpload = document.getElementById('iconUpload');
+    const iconPreview = document.getElementById('iconPreview');
+    const toggleAdvanced = document.getElementById('toggleAdvanced');
+    const advancedPanel = document.getElementById('advancedPanel');
+    const generateIdentifierBtn = document.getElementById('generateIdentifier');
+    const titleInput = document.getElementById('title');
+    const identifierInput = document.getElementById('identifier');
+    toggleAdvanced.addEventListener('click', () => {
+      advancedPanel.classList.toggle('hidden');
+      toggleAdvanced.textContent = 'Advanced Settings';
+    });
+    generateIdentifierBtn.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      if (title) {
+        const sanitizedTitle = title
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '')
+          .replace(/^[0-9]+/, '');
+        identifierInput.value = `com.webclip.${sanitizedTitle}`;
+      } else {
+        alert('Please enter an app title first');
+      }
+    });
+    iconUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          iconPreview.src = e.target.result;
+          iconPreview.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = {
+        title: document.getElementById('title').value,
+        url: document.getElementById('url').value,
+        identifier: document.getElementById('identifier').value,
+        fullscreen: document.getElementById('fullscreen').checked,
+        precomposed: document.getElementById('precomposed').checked,
+        removable: document.getElementById('removable').checked,
+        preventBackup: document.getElementById('preventBackup').checked,
+        description: document.getElementById('description').value,
+        organization: document.getElementById('organization').value,
+        expiryDays: document.getElementById('expiryDays').value
+      };
+      const iconFile = iconUpload.files[0];
+      if (!iconFile) {
+        alert('Please select an icon image');
+        return;
+      }
+      try {
+        const iconData = await getBase64(iconFile);
+        const profile = generateProfile(formData, iconData);
+        const baseFilename = formData.title.toLowerCase().replace(/\s+/g, '-');
+        
+        const downloadContainer = document.createElement('div');
+        downloadContainer.className = 'download-buttons';
+        
+        const mobileConfigBtn = document.createElement('button');
+        mobileConfigBtn.textContent = 'Download as .mobileconfig';
+        mobileConfigBtn.className = 'download-button';
+        mobileConfigBtn.onclick = () => downloadProfile(profile, `${baseFilename}.mobileconfig`, 'application/x-apple-aspen-config');
+        
+        const textBtn = document.createElement('button');
+        textBtn.textContent = 'Download as .txt';
+        textBtn.className = 'download-button secondary-button';
+        textBtn.onclick = () => downloadProfile(profile, `${baseFilename}.txt`, 'text/plain');
+        
+        downloadContainer.appendChild(mobileConfigBtn);
+        downloadContainer.appendChild(textBtn);
+        
+        const existingContainer = document.querySelector('.download-buttons');
+        if (existingContainer) {
+          existingContainer.remove();
+        }
+        
+        form.insertAdjacentElement('afterend', downloadContainer);
+      } catch (error) {
+        console.error('Error generating profile:', error);
+        alert('Error generating profile. Please try again.');
+      }
+    });
+
+    function getBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function generateProfile(formData, iconData) {
+      const uuid = uuidv4();
+      const now = new Date();
+      const expiryDate = formData.expiryDays 
+        ? new Date(now.getTime() + (formData.expiryDays * 24 * 60 * 60 * 1000)).toISOString()
+        : null;
+
+      const profile = {
+        PayloadContent: [{
+          FullScreen: formData.fullscreen,
+          Icon: {
+            "_type": "data",
+            "_value": iconData
+          },
+          IsRemovable: formData.removable,
+          Label: formData.title,
+          PayloadDescription: formData.description,
+          PayloadDisplayName: formData.title,
+          PayloadIdentifier: `${formData.identifier}.webclip.${uuid}`,
+          PayloadType: "com.apple.webClip.managed",
+          PayloadUUID: uuidv4(),
+          PayloadVersion: 1,
+          URL: formData.url,
+          PrecomposedIcon: formData.precomposed,
+          PreventBackup: formData.preventBackup
+        }],
+        PayloadDisplayName: `${formData.title} Web Clip`,
+        PayloadIdentifier: formData.identifier,
+        PayloadRemovalDisallowed: !formData.removable,
+        PayloadType: "Configuration",
+        PayloadUUID: uuid,
+        PayloadVersion: 1
+      };
+
+      if (formData.organization) {
+        profile.PayloadOrganization = formData.organization;
+      }
+
+      if (expiryDate) {
+        profile.RemovalDate = expiryDate;
+      }
+
+      return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  ${convertToXML(profile)}
+</plist>`;
+    }
+
+    function convertToXML(obj) {
+      if (typeof obj === 'boolean') {
+        return `<${obj}/>`;
+      }
+      
+      if (typeof obj === 'number') {
+        return `<integer>${obj}</integer>`;
+      }
+      
+      if (typeof obj === 'string') {
+        return `<string>${obj}</string>`;
+      }
+      
+      if (Array.isArray(obj)) {
+        return `<array>${obj.map(item => convertToXML(item)).join('')}</array>`;
+      }
+      
+      if (typeof obj === 'object' && obj !== null) {
+        if (obj._type === 'data') {
+          return `<data>${obj._value}</data>`;
+        }
+        
+        const entries = Object.entries(obj)
+          .filter(([key]) => !key.startsWith('_')) 
+          .map(([key, value]) => `<key>${key}</key>${convertToXML(value)}`)
+          .join('');
+        return `<dict>${entries}</dict>`;
+      }
+      
+      return '';
+    }
+
+    function downloadProfile(content, filename, contentType) {
+      const blob = new Blob([content], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
